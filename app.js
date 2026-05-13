@@ -395,7 +395,9 @@ async function handleCsvImport() {
         line = line.trim();
         if (!line) continue;
 
-        const [nome, idUnico] = line.split(",").map((s) => s.trim());
+        const [nome, idUnico, observacao] = line
+          .split(",")
+          .map((s) => s.trim());
         if (!nome) continue;
 
         await db.collection("participantes").add({
@@ -404,7 +406,7 @@ async function handleCsvImport() {
           origem: "lista_paga",
           Confirmado: false,
           horaEntrada: null,
-          observacao: "",
+          observacao: observacao || "",
           idEvento: appState.currentEventId,
           criadoEm: new Date(),
         });
