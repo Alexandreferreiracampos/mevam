@@ -225,7 +225,21 @@ function handleSearch() {
         (p.idUnico && p.idUnico.toLowerCase().includes(searchTerm)),
     )
 
-    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    .sort((a, b) => {
+      // Confirmados primeiro
+      if (a.Confirmado && !b.Confirmado) {
+        return 1;
+      }
+
+      if (!a.Confirmado && b.Confirmado) {
+        return -1;
+      }
+
+      // Ordem alfabética
+      return a.nome.localeCompare(b.nome, "pt-BR", {
+        sensitivity: "base",
+      });
+    });
 
   if (results.length === 0) {
     searchResults.innerHTML =
@@ -534,6 +548,17 @@ async function exportToPDF() {
     );
   }
 
+  filtered.sort((a, b) => {
+    // Primeiro: Confirmados no topo
+    if (a.Confirmado && !b.Confirmado) return -1;
+    if (!a.Confirmado && b.Confirmado) return 1;
+
+    // Depois: ordem alfabética
+    return a.nome.localeCompare(b.nome, "pt-BR", {
+      sensitivity: "base",
+    });
+  });
+
   const { jsPDF } = window.jspdf;
 
   const doc = new jsPDF({
@@ -754,12 +779,22 @@ function quickCheckinFilter(type) {
     filtered = appState.participants.filter((p) => !p.Confirmado);
   }
 
-  // Ordena alfabeticamente
-  filtered.sort((a, b) =>
-    a.nome.localeCompare(b.nome, "pt-BR", {
+  // Ordenação
+  filtered.sort((a, b) => {
+    // Confirmados primeiro
+    if (a.Confirmado && !b.Confirmado) {
+      return 1;
+    }
+
+    if (!a.Confirmado && b.Confirmado) {
+      return -1;
+    }
+
+    // Ordem alfabética
+    return a.nome.localeCompare(b.nome, "pt-BR", {
       sensitivity: "base",
-    }),
-  );
+    });
+  });
 
   if (filtered.length === 0) {
     searchResults.innerHTML =
@@ -773,7 +808,6 @@ function quickCheckinFilter(type) {
     searchResults.appendChild(createParticipantElement(participant, true));
   });
 }
-
 // Atribui os cliques aos cards
 document.getElementById("counter-all").onclick = () =>
   quickCheckinFilter("all");
