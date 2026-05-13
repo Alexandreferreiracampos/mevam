@@ -232,7 +232,7 @@ async function handleCheckin(participantId) {
   try {
     showLoading("Registrando entrada...");
     await db.collection("participantes").doc(participantId).update({
-      entrou: true,
+      Confirmado: true,
       horaEntrada: new Date(),
     });
     hideLoading();
@@ -266,7 +266,7 @@ async function handleAddNewParticipant() {
       nome: name,
       idUnico: generateId(),
       origem: "adicionado_na_hora",
-      entrou: true,
+      Confirmado: true,
       horaEntrada: new Date(),
       observacao: observation,
       idEvento: appState.currentEventId,
@@ -315,10 +315,26 @@ async function handleSaveObservation() {
     await db.collection("participantes").doc(participantId).update({
       observacao: observation,
     });
+
     hideLoading();
     closeEditModal();
     alert("Observação salva com sucesso!");
-    handleSearch(); // Atualizar resultados se estiver na busca
+
+    // ATUALIZAÇÃO INTELIGENTE:
+    // Se estiver na busca do Check-in, atualiza a busca
+    if (searchInput.value.trim() !== "") {
+      handleSearch();
+    }
+    // Se a aba de Relatório estiver aberta, atualiza o relatório
+    if (document.getElementById("report-tab").classList.contains("active")) {
+      displayReport();
+    }
+    // Se a aba de Gerenciamento estiver aberta, atualiza a lista
+    if (
+      document.getElementById("management-tab").classList.contains("active")
+    ) {
+      displayManagementList();
+    }
   } catch (error) {
     hideLoading();
     console.error("Erro ao salvar observação:", error);
@@ -355,7 +371,7 @@ async function handleCsvImport() {
           nome: nome,
           idUnico: idUnico || generateId(),
           origem: "lista_paga",
-          entrou: false,
+          Confirmado: false,
           horaEntrada: null,
           observacao: "",
           idEvento: appState.currentEventId,
@@ -398,14 +414,16 @@ function displayReport() {
   const totalExpected = appState.participants.filter(
     (p) => p.origem === "lista_paga",
   ).length;
-  const totalCheckedIn = appState.participants.filter((p) => p.entrou).length;
+  const totalCheckedIn = appState.participants.filter(
+    (p) => p.Confirmado,
+  ).length;
   const totalWithObservation = appState.participants.filter(
     (p) => p.observacao,
   ).length;
 
   reportSummary.innerHTML = `
         <p><strong>Total na lista pré-paga:</strong> ${totalExpected}</p>
-        <p><strong>Total que entrou:</strong> ${totalCheckedIn}</p>
+        <p><strong>Total que Confirmado:</strong> ${totalCheckedIn}</p>
         <p><strong>Total com observações:</strong> ${totalWithObservation}</p>
     `;
 
@@ -426,10 +444,10 @@ function filterReport() {
     );
   }
 
-  if (statusFilter === "entrou") {
-    filtered = filtered.filter((p) => p.entrou);
-  } else if (statusFilter === "nao-entrou") {
-    filtered = filtered.filter((p) => !p.entrou);
+  if (statusFilter === "Confirmado") {
+    filtered = filtered.filter((p) => p.Confirmado);
+  } else if (statusFilter === "nao-Confirmado") {
+    filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
     filtered = filtered.filter(
       (p) => p.observacao && p.observacao.trim() !== "",
@@ -450,13 +468,13 @@ function filterReport() {
 }
 
 function exportToCSV() {
-  let csv = "Nome,ID,Origem,Entrou,Hora Entrada,Observação\n";
+  let csv = "Nome,ID,Origem,Confirmado,Hora Entrada,Observação\n";
 
   appState.participants.forEach((p) => {
     const horaEntrada = p.horaEntrada
       ? new Date(p.horaEntrada.toDate()).toLocaleString("pt-BR")
       : "";
-    csv += `"${p.nome}","${p.idUnico}","${p.origem}","${p.entrou ? "Sim" : "Não"}","${horaEntrada}","${p.observacao}"\n`;
+    csv += `"${p.nome}","${p.idUnico}","${p.origem}","${p.Confirmado ? "Sim" : "Não"}","${horaEntrada}","${p.observacao}"\n`;
   });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -489,10 +507,10 @@ async function exportToPDF() {
     );
   }
 
-  if (statusFilter === "entrou") {
-    filtered = filtered.filter((p) => p.entrou);
-  } else if (statusFilter === "nao-entrou") {
-    filtered = filtered.filter((p) => !p.entrou);
+  if (statusFilter === "Confirmado") {
+    filtered = filtered.filter((p) => p.Confirmado);
+  } else if (statusFilter === "nao-Confirmado") {
+    filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
     filtered = filtered.filter(
       (p) => p.observacao && p.observacao.trim() !== "",
@@ -521,15 +539,23 @@ async function exportToPDF() {
 
   doc.text(`Total Exibido: ${filtered.length}`, 14, 37);
 
-  doc.text(`Entraram: ${filtered.filter((p) => p.entrou).length}`, 14, 44);
+  doc.text(
+    `Confirmado: ${filtered.filter((p) => p.Confirmado).length}`,
+    14,
+    44,
+  );
 
-  doc.text(`Não Entraram: ${filtered.filter((p) => !p.entrou).length}`, 14, 51);
+  doc.text(
+    `Não Confirmado: ${filtered.filter((p) => !p.Confirmado).length}`,
+    14,
+    51,
+  );
 
   // Dados da tabela
   const tableData = filtered.map((p) => [
     p.nome || "-",
 
-    p.entrou ? "Entrou" : "Não Entrou",
+    p.Confirmado ? "Confirmado" : "Não Confirmado",
 
     p.horaEntrada?.toDate
       ? new Date(p.horaEntrada.toDate()).toLocaleString("pt-BR")
@@ -601,7 +627,7 @@ function createParticipantElement(participant, isClickable = false) {
   const div = document.createElement("div");
   div.className = "participant-item";
 
-  if (participant.entrou) {
+  if (participant.Confirmado) {
     div.classList.add("checked-in");
   } else if (participant.origem === "adicionado_na_hora") {
     div.classList.add("exception");
@@ -616,7 +642,7 @@ function createParticipantElement(participant, isClickable = false) {
 
   const details = document.createElement("div");
   details.className = "participant-details";
-  details.textContent = `ID: ${participant.idUnico} | ${participant.entrou ? "✓ Entrou" : "✗ Não Entrou"}`;
+  details.textContent = `ID: ${participant.idUnico} | ${participant.Confirmado ? "✓ Confirmado" : "✗ Não Confirmado"}`;
 
   if (participant.horaEntrada) {
     const hora = new Date(participant.horaEntrada.toDate()).toLocaleTimeString(
@@ -640,7 +666,7 @@ function createParticipantElement(participant, isClickable = false) {
   const actions = document.createElement("div");
   actions.className = "participant-actions";
 
-  if (isClickable && !participant.entrou) {
+  if (isClickable && !participant.Confirmado) {
     const checkinBtn = document.createElement("button");
     checkinBtn.className = "btn-success";
     checkinBtn.textContent = "Dar Baixa";
@@ -666,11 +692,14 @@ function updateCounters() {
   const totalExpected = appState.participants.filter(
     (p) => p.origem === "lista_paga",
   ).length;
-  const totalCheckedIn = appState.participants.filter((p) => p.entrou).length;
+  const totalCheckedIn = appState.participants.filter(
+    (p) => p.Confirmado,
+  ).length;
   const totalMissing =
     totalExpected -
-    appState.participants.filter((p) => p.origem === "lista_paga" && p.entrou)
-      .length;
+    appState.participants.filter(
+      (p) => p.origem === "lista_paga" && p.Confirmado,
+    ).length;
 
   expectedCount.textContent = totalExpected;
   checkedInCount.textContent = totalCheckedIn;
@@ -694,9 +723,9 @@ function quickCheckinFilter(type) {
   if (type === "all") {
     filtered = appState.participants;
   } else if (type === "checked") {
-    filtered = appState.participants.filter((p) => p.entrou);
+    filtered = appState.participants.filter((p) => p.Confirmado);
   } else if (type === "missing") {
-    filtered = appState.participants.filter((p) => !p.entrou);
+    filtered = appState.participants.filter((p) => !p.Confirmado);
   }
 
   if (filtered.length === 0) {

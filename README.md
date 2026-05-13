@@ -75,12 +75,12 @@ Abra `firebase-config.js` e substitua:
 
 ```javascript
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef1234567890"
+  apiKey: "SUA_API_KEY",
+  authDomain: "seu-projeto.firebaseapp.com",
+  projectId: "seu-projeto",
+  storageBucket: "seu-projeto.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef1234567890",
 };
 ```
 
@@ -127,6 +127,7 @@ npx http-server
 3. Clique em "Importar"
 
 **Formato do CSV:**
+
 ```
 João Silva, ID001
 Maria Santos, ID002
@@ -141,13 +142,13 @@ Pedro Oliveira, ID003
 
 ## 📁 Arquivos
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `index.html` | Estrutura HTML |
-| `style.css` | Estilos e design |
-| `app.js` | Lógica da aplicação |
+| Arquivo              | Descrição                |
+| -------------------- | ------------------------ |
+| `index.html`         | Estrutura HTML           |
+| `style.css`          | Estilos e design         |
+| `app.js`             | Lógica da aplicação      |
 | `firebase-config.js` | Configuração do Firebase |
-| `README.md` | Este arquivo |
+| `README.md`          | Este arquivo             |
 
 ## 🔧 Alterar Credenciais de Login
 
@@ -155,8 +156,8 @@ Abra `app.js` e procure por:
 
 ```javascript
 const VALID_CREDENTIALS = {
-    username: "admin",
-    password: "1234"
+  username: "admin",
+  password: "1234",
 };
 ```
 
@@ -165,14 +166,17 @@ Altere para o que desejar.
 ## 🐛 Troubleshooting
 
 ### "Firebase is not defined"
+
 - Verifique se os scripts do Firebase estão carregando
 - Abra o console (F12) e procure por erros
 
 ### "Permission denied" ao salvar
+
 - Verifique se as regras do Firestore estão corretas
 - Certifique-se de que o banco está em "Modo de teste"
 
 ### Dados não aparecem
+
 - Verifique a conexão com a internet
 - Verifique se o `projectId` está correto em `firebase-config.js`
 - Abra o console (F12) e procure por mensagens de erro
@@ -187,7 +191,7 @@ participantes/
 │   ├── nome: "João Silva"
 │   ├── idUnico: "ID123456"
 │   ├── origem: "lista_paga"
-│   ├── entrou: true
+│   ├── Confirmado: true
 │   ├── horaEntrada: 2026-05-13T14:30:00
 │   ├── observacao: ""
 │   └── idEvento: "evento_padrao"
@@ -195,7 +199,7 @@ participantes/
     ├── nome: "Maria Santos"
     ├── idUnico: "ID789012"
     ├── origem: "adicionado_na_hora"
-    ├── entrou: true
+    ├── Confirmado: true
     ├── horaEntrada: 2026-05-13T14:35:00
     ├── observacao: "Pagou na hora"
     └── idEvento: "evento_padrao"
@@ -206,6 +210,7 @@ participantes/
 ### Mudar Cores
 
 Abra `style.css` e procure por:
+
 ```css
 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 ```
@@ -213,6 +218,7 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 ### Mudar Título
 
 Abra `index.html` e altere:
+
 ```html
 <h1>Controle de Entrada de Eventos</h1>
 ```
@@ -220,6 +226,7 @@ Abra `index.html` e altere:
 ## 📱 Responsividade
 
 O sistema funciona perfeitamente em:
+
 - 📱 Smartphones
 - 📱 Tablets
 - 💻 Desktops
@@ -242,6 +249,7 @@ Para colocar online, use:
 ## 📞 Suporte
 
 Se tiver dúvidas, verifique:
+
 1. O console do navegador (F12)
 2. As regras do Firestore
 3. A configuração em `firebase-config.js`

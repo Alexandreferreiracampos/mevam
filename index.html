@@ -60,11 +60,11 @@
               <span id="expected-count" class="value">0</span>
             </div>
             <div class="counter" id="counter-checked" style="cursor: pointer">
-              <span class="label">Entraram:</span>
+              <span class="label">Confirmado:</span>
               <span id="checked-in-count" class="value">0</span>
             </div>
             <div class="counter" id="counter-missing" style="cursor: pointer">
-              <span class="label">Faltam:</span>
+              <span class="label">Aguardando:</span>
               <span id="missing-count" class="value">0</span>
             </div>
           </div>
@@ -78,25 +78,6 @@
           </div>
 
           <div id="search-results" class="results-list"></div>
-
-          <!-- Modal para editar observação -->
-          <div id="edit-modal" class="modal hidden">
-            <div class="modal-content">
-              <h3>Editar Observação</h3>
-              <textarea
-                id="edit-observation"
-                placeholder="Adicione uma observação"
-              ></textarea>
-              <div class="modal-buttons">
-                <button id="save-observation-btn" class="btn-primary">
-                  Salvar
-                </button>
-                <button id="close-modal-btn" class="btn-secondary">
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
 
           <div class="add-section">
             <button id="toggle-add-btn" class="btn-secondary">
@@ -153,8 +134,8 @@
             />
             <select id="report-filter">
               <option value="">Todos</option>
-              <option value="entrou">Entrou</option>
-              <option value="nao-entrou">Não Entrou</option>
+              <option value="Confirmado">Confirmado</option>
+              <option value="nao-Confirmado">Não Confirmado</option>
               <option value="com-observacao">Com Observação</option>
             </select>
             <button id="export-csv-btn" class="btn-secondary">
@@ -168,6 +149,23 @@
           <div id="report-list" class="results-list"></div>
         </section>
       </main>
+
+      <!-- Modal para editar observação -->
+      <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Editar Observação</h3>
+          <textarea
+            id="edit-observation"
+            placeholder="Adicione uma observação"
+          ></textarea>
+          <div class="modal-buttons">
+            <button id="save-observation-btn" class="btn-primary">
+              Salvar
+            </button>
+            <button id="close-modal-btn" class="btn-secondary">Cancelar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Scripts Firebase -->
