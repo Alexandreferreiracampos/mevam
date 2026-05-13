@@ -254,9 +254,6 @@ async function handleCheckin(participantId) {
 }
 
 function toggleAddForm() {
-  searchInput.value = ""; // Limpa a busca ao abrir o formulário
-  searchResults.innerHTML = "";
-
   addForm.classList.toggle("hidden");
   if (!addForm.classList.contains("hidden")) {
     newName.focus();
@@ -289,6 +286,7 @@ async function handleAddNewParticipant() {
     newName.value = "";
     newObservation.value = "";
     toggleAddForm();
+    alert("Participante adicionado com sucesso!");
   } catch (error) {
     hideLoading();
     console.error("Erro ao adicionar participante:", error);
@@ -677,7 +675,7 @@ function createParticipantElement(participant, isClickable = false) {
   const actions = document.createElement("div");
   actions.className = "participant-actions";
 
-  if (isClickable && !participant.Confirmado) {
+  if (isClickable && !participant.entrou) {
     const checkinBtn = document.createElement("button");
     checkinBtn.className = "btn-success";
     checkinBtn.textContent = "Check-in";
@@ -771,20 +769,14 @@ document.getElementById("counter-missing").onclick = () =>
 const menuToggle = document.getElementById("menu-toggle");
 const navTabs = document.getElementById("nav-tabs");
 
-const overlay = document.querySelector(".menu-overlay");
-
 menuToggle.addEventListener("click", () => {
   navTabs.classList.toggle("show");
-
-  overlay.style.display = navTabs.classList.contains("show")
-    ? "inline"
-    : "none";
 });
+
 // Fecha o menu automaticamente ao clicar em uma aba
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     navTabs.classList.remove("show");
-    overlay.style.display = "none";
   });
 });
 
