@@ -653,7 +653,7 @@ function createParticipantElement(participant, isClickable = false) {
 
   const details = document.createElement("div");
   details.className = "participant-details";
-  details.textContent = `ID: ${participant.idUnico} | ${participant.Confirmado ? "✓ Confirmado" : "✗ Não Confirmado"}`;
+  details.textContent = `${participant.Confirmado ? "✓ Confirmado" : "✗ Não Confirmado"}`;
 
   if (participant.horaEntrada) {
     const hora = new Date(participant.horaEntrada.toDate()).toLocaleTimeString(
