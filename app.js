@@ -208,23 +208,29 @@ function loadParticipantsFromFirestore() {
 // ============================================
 function handleSearch() {
   const searchTerm = searchInput.value.toLowerCase().trim();
+
   searchResults.innerHTML = "";
 
   if (!searchTerm) {
     searchResults.innerHTML =
       "<p style='padding: 20px; text-align: center; color: #999;'>Digite um nome ou ID para buscar</p>";
+
     return;
   }
 
-  const results = appState.participants.filter(
-    (p) =>
-      p.nome.toLowerCase().includes(searchTerm) ||
-      (p.idUnico && p.idUnico.toLowerCase().includes(searchTerm)),
-  );
+  const results = appState.participants
+    .filter(
+      (p) =>
+        p.nome.toLowerCase().includes(searchTerm) ||
+        (p.idUnico && p.idUnico.toLowerCase().includes(searchTerm)),
+    )
+
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
   if (results.length === 0) {
     searchResults.innerHTML =
       "<p style='padding: 20px; text-align: center; color: #999;'>Nenhum participante encontrado</p>";
+
     return;
   }
 
@@ -739,6 +745,7 @@ function quickCheckinFilter(type) {
   searchResults.innerHTML = "";
 
   let filtered = [];
+
   if (type === "all") {
     filtered = appState.participants;
   } else if (type === "checked") {
@@ -747,13 +754,21 @@ function quickCheckinFilter(type) {
     filtered = appState.participants.filter((p) => !p.Confirmado);
   }
 
+  // Ordena alfabeticamente
+  filtered.sort((a, b) =>
+    a.nome.localeCompare(b.nome, "pt-BR", {
+      sensitivity: "base",
+    }),
+  );
+
   if (filtered.length === 0) {
     searchResults.innerHTML =
       "<p style='padding: 20px; text-align: center; color: #999;'>Nenhum participante encontrado</p>";
+
     return;
   }
 
-  // Usa a função de criar elementos que já existe no seu código
+  // Renderiza os participantes
   filtered.forEach((participant) => {
     searchResults.appendChild(createParticipantElement(participant, true));
   });
