@@ -157,13 +157,12 @@ header h1 {
 }
 
 #logout-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(230, 4, 4, 0.712);
   color: white;
   border: 1px solid white;
   padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s;
 }
 
 #logout-btn:hover {
