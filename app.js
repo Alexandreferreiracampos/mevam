@@ -9,8 +9,12 @@ const VALID_CREDENTIALS = {
 // ============================================
 // ESTADO GLOBAL
 // ============================================
+// ============================================
+// ESTADO GLOBAL (COM MEMÓRIA DE LOGIN)
+// ============================================
 const appState = {
-  isLoggedIn: false,
+  // Verifica se já existe um login salvo no celular
+  isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
   participants: [],
   currentEventId: "evento_padrao",
   editingParticipantId: null,
@@ -124,9 +128,11 @@ function handleLogin(e) {
     password === VALID_CREDENTIALS.password
   ) {
     appState.isLoggedIn = true;
+    localStorage.setItem("isLoggedIn", "true");
     loginError.textContent = "";
     loginScreen.classList.add("hidden");
     mainScreen.classList.remove("hidden");
+    loadParticipantsFromFirestore(); // Adicionado para carregar os dados
     usernameInput.value = "";
     passwordInput.value = "";
   } else {
@@ -136,6 +142,7 @@ function handleLogin(e) {
 
 function handleLogout() {
   appState.isLoggedIn = false;
+  localStorage.removeItem("isLoggedIn");
   loginScreen.classList.remove("hidden");
   mainScreen.classList.add("hidden");
   loginError.textContent = "";
@@ -726,3 +733,37 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     navTabs.classList.remove("show");
   });
 });
+
+// ============================================
+// PERSISTÊNCIA DE LOGIN (CORRIGIDO)
+// ============================================
+
+// Função para mostrar a tela principal
+function goToMainScreen() {
+  loginScreen.classList.add("hidden");
+  mainScreen.classList.remove("hidden");
+  loadParticipantsFromFirestore(); // Nome corrigido aqui!
+}
+
+// Função para mostrar a tela de login
+function goToLoginScreen() {
+  loginScreen.classList.remove("hidden");
+  mainScreen.classList.add("hidden");
+}
+
+// Verificação ao carregar a página
+window.addEventListener("load", () => {
+  const savedLogin = localStorage.getItem("isLoggedIn");
+  if (savedLogin === "true") {
+    appState.isLoggedIn = true;
+    goToMainScreen();
+  } else {
+    goToLoginScreen();
+  }
+});
+
+// Ajuste no seu evento de LOGIN (procure onde você valida a senha e adicione):
+// localStorage.setItem("isLoggedIn", "true");
+
+// Ajuste no seu evento de LOGOUT (procure o botão sair e adicione):
+// localStorage.removeItem("isLoggedIn");
