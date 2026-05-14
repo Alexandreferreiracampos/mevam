@@ -36,6 +36,7 @@ const confirmYesBtn = document.getElementById("confirm-yes-btn");
 const confirmNoBtn = document.getElementById("confirm-no-btn");
 const editPaid = document.getElementById("edit-paid");
 const newPaid = document.getElementById("new-paid");
+let currentQuickFilter = "all";
 let participantIdToConfirm = null; // Para guardar quem estamos confirmando
 
 // Modal de Carregamento
@@ -333,7 +334,9 @@ function openEditModal(participantId) {
   editObservation.value = participant.observacao || "";
   editModal.classList.remove("hidden");
   editPaid.checked = participant.pago || false;
-  editObservation.focus();
+
+  //abrri o teclado automaticamente no celular
+  //editObservation.focus();
 }
 
 function closeEditModal() {
@@ -358,7 +361,8 @@ async function handleSaveObservation() {
 
     hideLoading();
     closeEditModal();
-    alert("Observação salva com sucesso!");
+
+    quickCheckinFilter(currentQuickFilter);
 
     // ATUALIZAÇÃO INTELIGENTE:
     // Se estiver na busca do Check-in, atualiza a busca
@@ -786,6 +790,9 @@ function generateId() {
 // FILTROS RÁPIDOS NA TELA DE CHECK-IN
 // ============================================
 function quickCheckinFilter(type) {
+  // GUARDA O FILTRO ATUAL
+  currentQuickFilter = type;
+
   // Limpa a lista atual
   searchResults.innerHTML = "";
 
