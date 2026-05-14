@@ -526,10 +526,15 @@ function displayReport() {
     (p) => !p.pago,
   ).length;
 
+  const totalDormeEscola = appState.participants.filter(
+    (p) => p.dormeEscola && p.dormeEscola.toLowerCase().includes("sim"),
+  ).length;
+
   reportSummary.innerHTML = `
-        <p><strong>Total na lista pré-paga:</strong> ${totalExpected}</p>
-        <p><strong>Total que Confirmado:</strong> ${totalCheckedIn}</p>
+  
+        <p><strong>Total de Check-in:</strong> ${totalCheckedIn}</p>
         <p><strong>Aguardando Pagamento:</strong> ${totalWithObservation}</p>
+        <p><strong>Vão dormir na escola:</strong> ${totalDormeEscola}</p>
     `;
 
   filterReport();
@@ -826,6 +831,48 @@ function createParticipantElement(participant, isClickable = false) {
   editBtn.addEventListener("click", () => openEditModal(participant.id));
   actions.appendChild(editBtn);
 
+  if (participant.Confirmado) {
+    const undoBtn = document.createElement("button");
+
+    undoBtn.className = "btn-warning";
+
+    undoBtn.textContent = "↩ Remover";
+
+    undoBtn.addEventListener("click", async () => {
+      const confirmar = confirm(`Remover check-in de ${participant.nome}?`);
+
+      if (!confirmar) return;
+
+      try {
+        showLoading("Removendo check-in...");
+
+        await db.collection("participantes").doc(participant.id).update({
+          Confirmado: false,
+
+          horaEntrada: null,
+        });
+
+        hideLoading();
+
+        // Atualiza busca/lista atual
+        handleSearch();
+
+        // Atualiza filtros rápidos
+        if (typeof currentQuickFilter !== "undefined") {
+          quickCheckinFilter(currentQuickFilter);
+        }
+      } catch (error) {
+        hideLoading();
+
+        console.error("Erro ao remover check-in:", error);
+
+        alert("Erro ao remover check-in!");
+      }
+    });
+
+    actions.appendChild(undoBtn);
+  }
+
   if (actions.children.length > 0) {
     div.appendChild(actions);
   }
@@ -841,11 +888,9 @@ function updateCounters() {
   const totalCheckedIn = appState.participants.filter(
     (p) => p.Confirmado,
   ).length;
-  const totalMissing =
-    totalExpected -
-    appState.participants.filter(
-      (p) => p.origem === "lista_paga" && p.Confirmado,
-    ).length;
+  const totalMissing = appState.participants.filter(
+    (p) => !p.Confirmado,
+  ).length;
 
   expectedCount.textContent = appState.participants.length;
   checkedInCount.textContent = totalCheckedIn;

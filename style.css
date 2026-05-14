@@ -828,3 +828,29 @@ h3 {
 
   cursor: pointer;
 }
+
+.btn-warning {
+  background: #ff9800;
+
+  color: white;
+
+  border: none;
+
+  padding: 8px 12px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.btn-warning:hover {
+  background: #f57c00;
+
+  transform: scale(1.03);
+}
