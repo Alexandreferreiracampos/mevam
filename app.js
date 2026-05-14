@@ -2,8 +2,8 @@
 // CONFIGURAÇÃO DE LOGIN SIMPLES (SEM FIREBASE AUTH)
 // ============================================
 const VALID_CREDENTIALS = {
-  username: "admin",
-  password: "1234",
+  username: "mevam",
+  password: "mevam123",
 };
 
 // ============================================

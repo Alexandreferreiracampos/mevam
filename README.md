@@ -189,15 +189,15 @@ Os dados são salvos no Firestore assim:
 participantes/
 ├── {doc1}
 │   ├── nome: "João Silva"
-│   ├── id: "ID123456"
-│   ├── origem: "lista"
+│   ├── idUnico: "ID123456"
+│   ├── origem: "lista_paga"
 │   ├── Confirmado: true
 │   ├── horaEntrada: 2026-05-13T14:30:00
 │   ├── observacao: ""
 │   └── idEvento: "evento_padrao"
 └── {doc2}
     ├── nome: "Maria Santos"
-    ├── id: "ID789012"
+    ├── idUnico: "ID789012"
     ├── origem: "adicionado_na_hora"
     ├── Confirmado: true
     ├── horaEntrada: 2026-05-13T14:35:00
