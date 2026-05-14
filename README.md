@@ -212,7 +212,7 @@ participantes/
 Abra `style.css` e procure por:
 
 ```css
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+background: linear-gradient(135deg, #4fb9d1 0%, #01606e 100%);
 ```
 
 ### Mudar Título
