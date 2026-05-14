@@ -459,13 +459,13 @@ function displayReport() {
     (p) => p.Confirmado,
   ).length;
   const totalWithObservation = appState.participants.filter(
-    (p) => p.observacao,
+    (p) => !p.pago,
   ).length;
 
   reportSummary.innerHTML = `
         <p><strong>Total na lista pré-paga:</strong> ${totalExpected}</p>
         <p><strong>Total que Confirmado:</strong> ${totalCheckedIn}</p>
-        <p><strong>Total com observações:</strong> ${totalWithObservation}</p>
+        <p><strong>Aguardando Pagamento:</strong> ${totalWithObservation}</p>
     `;
 
   filterReport();
