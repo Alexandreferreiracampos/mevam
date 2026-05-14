@@ -34,6 +34,8 @@ const confirmModal = document.getElementById("confirm-modal");
 const confirmMessage = document.getElementById("confirm-message");
 const confirmYesBtn = document.getElementById("confirm-yes-btn");
 const confirmNoBtn = document.getElementById("confirm-no-btn");
+const editPaid = document.getElementById("edit-paid");
+const newPaid = document.getElementById("new-paid");
 let participantIdToConfirm = null; // Para guardar quem estamos confirmando
 
 // Modal de Carregamento
@@ -285,7 +287,10 @@ function toggleAddForm() {
 
 async function handleAddNewParticipant() {
   const name = newName.value.trim();
+
   const observation = newObservation.value.trim();
+
+  const pago = newPaid.checked;
 
   if (!name || !observation) {
     alert("Nome e observação são obrigatórios!");
@@ -301,6 +306,7 @@ async function handleAddNewParticipant() {
       Confirmado: true,
       horaEntrada: new Date(),
       observacao: observation,
+      pago: pago,
       idEvento: appState.currentEventId,
       criadoEm: new Date(),
     });
@@ -326,6 +332,7 @@ function openEditModal(participantId) {
   appState.editingParticipantId = participantId;
   editObservation.value = participant.observacao || "";
   editModal.classList.remove("hidden");
+  editPaid.checked = participant.pago || false;
   editObservation.focus();
 }
 
@@ -337,6 +344,7 @@ function closeEditModal() {
 
 async function handleSaveObservation() {
   const observation = editObservation.value.trim();
+  const pago = editPaid.checked;
   const participantId = appState.editingParticipantId;
 
   if (!participantId) return;
@@ -345,6 +353,7 @@ async function handleSaveObservation() {
     showLoading("Salvando observação...");
     await db.collection("participantes").doc(participantId).update({
       observacao: observation,
+      pago: pago,
     });
 
     hideLoading();
@@ -395,16 +404,15 @@ async function handleCsvImport() {
         line = line.trim();
         if (!line) continue;
 
-        const [nome, idUnico, observacao] = line
-          .split(",")
-          .map((s) => s.trim());
+        const [nome, pago, observacao] = line.split(",").map((s) => s.trim());
         if (!nome) continue;
 
         await db.collection("participantes").add({
           nome: nome,
-          idUnico: idUnico || generateId(),
+          idUnico: generateId(),
           origem: "lista_paga",
           Confirmado: false,
+          pago: pago ? pago.toLowerCase() === "sim" : false,
           horaEntrada: null,
           observacao: observacao || "",
           idEvento: appState.currentEventId,
@@ -482,9 +490,7 @@ function filterReport() {
   } else if (statusFilter === "nao-Confirmado") {
     filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
-    filtered = filtered.filter(
-      (p) => p.observacao && p.observacao.trim() !== "",
-    );
+    filtered = filtered.filter((p) => !p.pago);
   }
 
   reportList.innerHTML = "";
@@ -532,6 +538,8 @@ async function exportToPDF() {
 
   let filtered = appState.participants;
 
+  console.log("Exportando PDF com os seguintes filtros:");
+
   if (searchTerm) {
     filtered = filtered.filter(
       (p) =>
@@ -545,9 +553,7 @@ async function exportToPDF() {
   } else if (statusFilter === "nao-Confirmado") {
     filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
-    filtered = filtered.filter(
-      (p) => p.observacao && p.observacao.trim() !== "",
-    );
+    filtered = filtered.filter((p) => !p.pago);
   }
 
   filtered.sort((a, b) => {
@@ -686,7 +692,7 @@ function createParticipantElement(participant, isClickable = false) {
 
   const details = document.createElement("div");
   details.className = "participant-details";
-  details.textContent = `${participant.Confirmado ? "✓ Confirmado" : "✗ Não Confirmado"}`;
+  details.textContent = `${participant.Confirmado ? "✓ Check-in" : "✗ Não Confirmado"}`;
 
   if (participant.horaEntrada) {
     const hora = new Date(participant.horaEntrada.toDate()).toLocaleTimeString(
@@ -703,6 +709,17 @@ function createParticipantElement(participant, isClickable = false) {
     obs.className = "participant-observation";
     obs.textContent = `📝 ${participant.observacao}`;
     info.appendChild(obs);
+  }
+
+  // MOSTRA STATUS DE PAGAMENTO
+  if (participant.pago) {
+    const paid = document.createElement("div");
+
+    paid.className = "participant-paid";
+
+    paid.textContent = "💰 Pago";
+
+    info.appendChild(paid);
   }
 
   div.appendChild(info);
@@ -741,6 +758,7 @@ function createParticipantElement(participant, isClickable = false) {
 }
 
 function updateCounters() {
+  console.log(appState.participants);
   const totalExpected = appState.participants.filter(
     (p) => p.origem === "lista_paga",
   ).length;
@@ -753,7 +771,7 @@ function updateCounters() {
       (p) => p.origem === "lista_paga" && p.Confirmado,
     ).length;
 
-  expectedCount.textContent = totalExpected;
+  expectedCount.textContent = appState.participants.length;
   checkedInCount.textContent = totalCheckedIn;
   missingCount.textContent = totalMissing;
 }

@@ -49,7 +49,7 @@
         <button class="tab-btn active" data-tab="checkin">Check-in</button>
         <button class="tab-btn" data-tab="management">Gerenciamento</button>
         <button class="tab-btn" data-tab="report">Relatório</button>
-        <button class="tab-btn" id="logout-btn">Sair</button>
+        <button class="tab-btn" id="logout-btn" data-tab="checkin">Sair</button>
       </nav>
 
       <main>
@@ -63,7 +63,7 @@
               <span id="expected-count" class="value">0</span>
             </div>
             <div class="counter" id="counter-checked" style="cursor: pointer">
-              <span class="label">Confirmado:</span>
+              <span class="label">Check-in:</span>
               <span id="checked-in-count" class="value">0</span>
             </div>
             <div class="counter" id="counter-missing" style="cursor: pointer">
@@ -100,6 +100,15 @@
                 placeholder="Observação (ex: Pagou na hora, Convidado, etc)"
                 required
               ></textarea>
+
+              <!-- CHECKBOX -->
+              <div class="checkbox-container">
+                <label>
+                  <input type="checkbox" id="new-paid" />
+                  Pago
+                </label>
+              </div>
+
               <div class="form-buttons">
                 <button id="save-new-btn" class="btn-primary">Salvar</button>
                 <button id="cancel-new-btn" class="btn-secondary">
@@ -138,9 +147,9 @@
             />
             <select id="report-filter">
               <option value="">Todos</option>
-              <option value="Confirmado">Confirmado</option>
+              <option value="Confirmado">Check-in</option>
               <option value="nao-Confirmado">Não Confirmado</option>
-              <option value="com-observacao">Com Observação</option>
+              <option value="com-observacao">Aguardando Pagamento</option>
             </select>
             <button id="export-csv-btn" class="btn-secondary">
               Exportar CSV
@@ -186,6 +195,15 @@
             id="edit-observation"
             placeholder="Adicione uma observação"
           ></textarea>
+
+          <!-- CHECKBOX -->
+          <div class="checkbox-container">
+            <label>
+              <input type="checkbox" id="edit-paid" />
+              Pago
+            </label>
+          </div>
+
           <div class="modal-buttons">
             <button id="save-observation-btn" class="btn-primary">
               Salvar
