@@ -266,9 +266,7 @@ async function handleCheckin(participantId) {
     hideLoading();
     // --- ADICIONE ESTA LINHA ABAIXO ---
     searchInput.value = ""; // Limpa o campo de busca
-    // ----------------------------------
-
-    handleSearch(); // Atualizar resultados
+    verUltimoParticipante();
   } catch (error) {
     hideLoading();
     console.error("Erro ao fazer check-in:", error);
@@ -784,6 +782,37 @@ function generateId() {
   return (
     "ID" + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase()
   );
+}
+
+function verUltimoParticipante() {
+  // Limpa lista
+  searchResults.innerHTML = "";
+
+  // Apenas confirmados
+  let filtered = appState.participants.filter((p) => p.Confirmado);
+
+  // ORDENA DO MAIS NOVO PARA O MAIS ANTIGO
+  filtered.sort((a, b) => {
+    const dataA = a.horaEntrada?.toDate ? a.horaEntrada.toDate() : new Date(0);
+
+    const dataB = b.horaEntrada?.toDate ? b.horaEntrada.toDate() : new Date(0);
+
+    return dataB - dataA;
+  });
+
+  console.log("Confirmados ordenados:", filtered);
+
+  if (filtered.length === 0) {
+    searchResults.innerHTML =
+      "<p style='padding: 20px; text-align: center; color: #999;'>Nenhum participante encontrado</p>";
+
+    return;
+  }
+
+  // Renderiza
+  filtered.forEach((participant) => {
+    searchResults.appendChild(createParticipantElement(participant, true));
+  });
 }
 
 // ============================================
