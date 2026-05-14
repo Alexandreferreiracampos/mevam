@@ -75,7 +75,6 @@ const managementList = document.getElementById("management-list");
 const reportSummary = document.getElementById("report-summary");
 const reportSearch = document.getElementById("report-search");
 const reportFilter = document.getElementById("report-filter");
-const exportCsvBtn = document.getElementById("export-csv-btn");
 const exportPdfBtn = document.getElementById("export-pdf-btn");
 const reportList = document.getElementById("report-list");
 
@@ -119,7 +118,6 @@ function setupEventListeners() {
   // Relatório
   reportSearch.addEventListener("input", filterReport);
   reportFilter.addEventListener("change", filterReport);
-  exportCsvBtn.addEventListener("click", exportToCSV);
   exportPdfBtn.addEventListener("click", exportToPDF);
 }
 
@@ -389,51 +387,115 @@ async function handleSaveObservation() {
 // ============================================
 async function handleCsvImport() {
   const file = csvFile.files[0];
+
   if (!file) {
     alert("Selecione um arquivo CSV!");
     return;
   }
 
   showLoading("Importando arquivo...");
+
   const reader = new FileReader();
+
   reader.onload = async (e) => {
     try {
       const csv = e.target.result;
+
+      // Divide linhas
       const lines = csv.split("\n");
+
       let addedCount = 0;
+
+      // Remove cabeçalho
+      lines.shift();
 
       for (let line of lines) {
         line = line.trim();
+
         if (!line) continue;
 
-        const [nome, pago, observacao] = line.split(",").map((s) => s.trim());
+        // Regex para CSV com aspas
+        const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+        if (!cols || cols.length < 2) continue;
+
+        // Limpa aspas
+        const clean = cols.map((c) => c.replace(/^"|"$/g, "").trim());
+
+        // ============================================
+        // COLUNAS DA PLANILHA
+        // ============================================
+
+        const [
+          dataHora,
+          nome,
+          telefone,
+          cidade,
+          ministerio,
+          pastor,
+          cargo,
+          dormeEscola,
+        ] = clean;
+
+        // Ignora sem nome
         if (!nome) continue;
+
+        // ============================================
+        // SALVA FIRESTORE
+        // ============================================
 
         await db.collection("participantes").add({
           nome: nome,
+
+          telefone: telefone || "",
+
+          cidade: cidade || "",
+
+          ministerio: ministerio || "",
+
+          pastor: pastor || "",
+
+          cargo: cargo || "",
+
+          dormeEscola: dormeEscola || "",
+
           idUnico: generateId(),
+
           origem: "lista_paga",
+
           Confirmado: false,
-          pago: pago ? pago.toLowerCase() === "sim" : false,
+
+          pago: true,
+
           horaEntrada: null,
-          observacao: observacao || "",
+
+          observacao: "",
+
           idEvento: appState.currentEventId,
-          criadoEm: new Date(),
+
+          criadoEm: dataHora ? new Date(dataHora) : new Date(),
         });
 
         addedCount++;
       }
 
       hideLoading();
+
       alert(`${addedCount} participante(s) importado(s)!`);
+
       csvFile.value = "";
     } catch (error) {
       hideLoading();
+
       console.error("Erro ao importar CSV:", error);
+
       alert("Erro ao importar CSV!");
     }
   };
-  reader.readAsText(file);
+
+  // IMPORTANTE:
+  // Corrige acentos UTF-8
+  reader.readAsText(file, "UTF-8");
 }
 
 function displayManagementList() {
@@ -493,6 +555,12 @@ function filterReport() {
     filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
     filtered = filtered.filter((p) => !p.pago);
+  } else if (statusFilter === "dorme-escola") {
+    filtered = filtered.filter((p) => {
+      if (!p.dormeEscola) return false;
+
+      return p.dormeEscola.toLowerCase().includes("sim");
+    });
   }
 
   reportList.innerHTML = "";
@@ -556,6 +624,12 @@ async function exportToPDF() {
     filtered = filtered.filter((p) => !p.Confirmado);
   } else if (statusFilter === "com-observacao") {
     filtered = filtered.filter((p) => !p.pago);
+  } else if (statusFilter === "dorme-escola") {
+    filtered = filtered.filter((p) => {
+      if (!p.dormeEscola) return false;
+
+      return p.dormeEscola.toLowerCase().includes("sim");
+    });
   }
 
   filtered.sort((a, b) => {
