@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CONFERÊNCIA DE MULHERES</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Tela de Login -->
+    <div id="login-screen" class="screen">
+      <div class="login-container">
+        <h1>CONFERÊNCIA DE MULHERES</h1>
+        <h1>JARDIM DA PRESENÇA</h1>
+        <form id="login-form">
+          <input type="text" id="username" placeholder="Usuário" required />
+          <input type="password" id="password" placeholder="Senha" required />
+          <button type="submit">Entrar</button>
+          <p id="login-error" class="error"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Carregamento -->
+    <div id="loading-modal" class="loading-modal hidden">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p id="loading-text">Processando...</p>
+      </div>
+    </div>
+
+    <!-- Tela Principal -->
+    <div id="main-screen" class="screen hidden">
+      <header></header>
+
+      <!-- Botão Menu Sanduíche -->
+      <button id="menu-toggle" class="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Fundo escuro quando o menu abre -->
+      <div id="menu-overlay" class="menu-overlay"></div>
+
+      <nav class="tabs" id="nav-tabs">
+        <button class="tab-btn active" data-tab="checkin">Check-in</button>
+        <button class="tab-btn" data-tab="management">Gerenciamento</button>
+        <button class="tab-btn" data-tab="report">Relatório</button>
+        <button class="tab-btn" id="logout-btn" data-tab="checkin">Sair</button>
+      </nav>
+
+      <main>
+        <!-- Aba: Check-in -->
+        <section id="checkin-tab" class="tab-content active">
+          <h2>Check-in de Participantes</h2>
+
+          <div class="counters">
+            <div class="counter" id="counter-all" style="cursor: pointer">
+              <span class="label">Total:</span>
+              <span id="expected-count" class="value">0</span>
+            </div>
+            <div class="counter" id="counter-checked" style="cursor: pointer">
+              <span class="label">Check-in:</span>
+              <span id="checked-in-count" class="value">0</span>
+            </div>
+            <div class="counter" id="counter-missing" style="cursor: pointer">
+              <span class="label">Aguardando:</span>
+              <span id="missing-count" class="value">0</span>
+            </div>
+          </div>
+
+          <button id="toggle-add-btn" class="btn-secondary">
+            + Adicionar Novo
+          </button>
+
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Buscar por nome ou ID"
+            />
+          </div>
+
+          <div id="search-results" class="results-list"></div>
+
+          <div class="add-section">
+            <div id="add-form" class="form-box hidden">
+              <h3>Novo Participante</h3>
+              <input
+                type="text"
+                id="new-name"
+                placeholder="Nome completo"
+                required
+              />
+              <textarea
+                id="new-observation"
+                placeholder="Observação (ex: Pagou na hora, Convidado, etc)"
+                required
+              ></textarea>
+
+              <!-- CHECKBOX -->
+              <div class="checkbox-container">
+                <label>
+                  <input type="checkbox" id="new-paid" />
+                  Pago
+                </label>
+              </div>
+
+              <div class="form-buttons">
+                <button id="save-new-btn" class="btn-primary">Salvar</button>
+                <button id="cancel-new-btn" class="btn-secondary">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Aba: Gerenciamento -->
+        <section id="management-tab" class="tab-content">
+          <h2>Gerenciamento de Participantes</h2>
+
+          <div class="import-section">
+            <h3>Importar Lista (CSV)</h3>
+            <input type="file" id="csv-file" accept=".csv" />
+            <button id="import-btn" class="btn-primary">Importar</button>
+            <p class="info">Formato: nome, idUnico (opcional)</p>
+          </div>
+
+          <div id="management-list" class="results-list"></div>
+        </section>
+
+        <!-- Aba: Relatório -->
+        <section id="report-tab" class="tab-content">
+          <h2>Relatório do Evento</h2>
+
+          <div id="report-summary" class="summary-box"></div>
+
+          <div class="filters">
+            <input
+              type="text"
+              id="report-search"
+              placeholder="Filtrar por nome"
+            />
+            <select id="report-filter">
+              <option value="">Todos</option>
+              <option value="Confirmado">Check-in</option>
+              <option value="nao-Confirmado">Não Confirmado</option>
+              <option value="com-observacao">Aguardando Pagamento</option>
+              <option value="dorme-escola">Vai dormir na escola</option>
+            </select>
+            <button id="export-csv-btn" class="btn-secondary">
+              Exportar CSV
+            </button>
+            <button id="export-pdf-btn" class="btn-secondary">
+              Exportar PDF
+            </button>
+          </div>
+
+          <div id="report-list" class="results-list"></div>
+        </section>
+      </main>
+
+      <!-- Modal de Confirmação de Check-in -->
+      <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3 style="color: #2d3748">Confirmar Entrada</h3>
+          <p id="confirm-message" style="margin: 20px 0; font-size: 1.1em"></p>
+          <div class="modal-buttons">
+            <button
+              id="confirm-yes-btn"
+              class="btn-success"
+              style="padding: 12px 25px"
+            >
+              Sim, Confirmar
+            </button>
+            <button
+              id="confirm-no-btn"
+              class="btn-secondary"
+              style="padding: 12px 25px"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para editar observação -->
+      <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Editar Observação</h3>
+          <textarea
+            id="edit-observation"
+            placeholder="Adicione uma observação"
+          ></textarea>
+
+          <!-- CHECKBOX -->
+          <div class="checkbox-container">
+            <label>
+              <input type="checkbox" id="edit-paid" />
+              Pago
+            </label>
+          </div>
+
+          <div class="modal-buttons">
+            <button id="save-observation-btn" class="btn-primary">
+              Salvar
+            </button>
+            <button id="close-modal-btn" class="btn-secondary">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <!-- Script para gerar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Configuração e Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
