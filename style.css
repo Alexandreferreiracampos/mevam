@@ -143,8 +143,12 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg, #4fb9d1 0%, #01606e 100%);
-  color: white;
+  background-image: url(header.png);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  min-height: 215px;
   padding: 20px;
   display: flex;
   justify-content: center;

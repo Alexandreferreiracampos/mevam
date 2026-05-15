@@ -52,7 +52,7 @@ body {
 
 .spinner {
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #E9AA9B
+  border-top: 4px solid #e9aa9b;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -109,7 +109,7 @@ body {
 
 #login-form input:focus {
   outline: none;
-  border-color: #E9AA9B
+  border-color: #e9aa9b;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
@@ -229,7 +229,7 @@ h2 {
 }
 
 h3 {
-  color: #E9AA9B
+  color: #e9aa9b;
   margin-bottom: 15px;
   font-size: 1.2em;
 }
@@ -248,7 +248,7 @@ h3 {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
-  border-left: 4px solid #E9AA9B;
+  border-left: 4px solid #e9aa9b;
   transition: all 0.3s ease;
 }
 
@@ -269,7 +269,7 @@ h3 {
   display: block;
   font-size: 1.8em;
   font-weight: bold;
-  color: #E9AA9B
+  color: #e9aa9b;
 }
 
 /* BUSCA */
@@ -290,13 +290,13 @@ h3 {
 
 .search-box input:focus {
   outline: none;
-  border-color: #E9AA9B
+  border-color: #e9aa9b;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
 .search-box button {
   padding: 12px 25px;
-  background: #E9AA9B
+  background: #e9aa9b;
   color: white;
   border: none;
   border-radius: 5px;
@@ -418,7 +418,7 @@ h3 {
 }
 
 .btn-secondary:hover {
-  background: #E9AA9B
+  background: #e9aa9b;
   transform: translateY(-2px);
 }
 
@@ -460,7 +460,7 @@ h3 {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-top: 15px;
-  border-left: 4px solid #E9AA9B;
+  border-left: 4px solid #e9aa9b;
 }
 
 .form-box.hidden {
@@ -481,7 +481,7 @@ h3 {
 .form-box input:focus,
 .form-box textarea:focus {
   outline: none;
-  border-color: #E9AA9B
+  border-color: #e9aa9b;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
@@ -544,7 +544,7 @@ h3 {
 
 .modal-content textarea:focus {
   outline: none;
-  border-color: #E9AA9B
+  border-color: #e9aa9b;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
@@ -594,7 +594,7 @@ h3 {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 25px;
-  border-left: 4px solid #E9AA9B
+  border-left: 4px solid #e9aa9b;
 }
 
 .summary-box p {
@@ -603,7 +603,7 @@ h3 {
 }
 
 .summary-box strong {
-  color: #E9AA9B
+  color: #e9aa9b;
 }
 
 .filters {
@@ -626,7 +626,7 @@ h3 {
 .filters input:focus,
 .filters select:focus {
   outline: none;
-  border-color: #E9AA9B
+  border-color: #e9aa9b;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
@@ -805,7 +805,7 @@ h3 {
   text-align: left;
   padding: 15px;
   margin-bottom: 10px;
-  background: #E9AA9B
+  background: #e9aa9b;
   color: white;
   border: none;
   border-radius: 8px;
