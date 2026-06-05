@@ -771,6 +771,37 @@ function createParticipantElement(participant, isClickable = false) {
   name.className = "participant-name";
   name.textContent = participant.nome;
 
+  name.style.cursor = "pointer";
+
+  name.addEventListener("click", async () => {
+    const confirmar = confirm(
+      `Deseja excluir o participante "${participant.nome}"?`,
+    );
+
+    if (!confirmar) return;
+
+    const senha = prompt("Digite a senha para excluir:");
+
+    if (senha !== "1234") {
+      alert("Senha incorreta!");
+      return;
+    }
+
+    try {
+      showLoading("Excluindo participante...");
+
+      await db.collection("participantes").doc(participant.id).delete();
+
+      hideLoading();
+
+      alert("Participante excluído com sucesso!");
+    } catch (error) {
+      hideLoading();
+      console.error("Erro ao excluir participante:", error);
+      alert("Erro ao excluir participante!");
+    }
+  });
+
   const details = document.createElement("div");
   details.className = "participant-details";
   details.textContent = `${participant.Confirmado ? "✓ Check-in" : "✗ Não Confirmado"}`;
