@@ -773,34 +773,56 @@ function createParticipantElement(participant, isClickable = false) {
 
   name.style.cursor = "pointer";
 
-  name.addEventListener("click", async () => {
-    const confirmar = confirm(
-      `Deseja excluir o participante "${participant.nome}"?`,
-    );
+  let pressTimer;
 
-    if (!confirmar) return;
+  function iniciarLongPress() {
+    pressTimer = setTimeout(async () => {
+      const confirmar = confirm(
+        `Deseja excluir o participante "${participant.nome}"?`,
+      );
 
-    const senha = prompt("Digite a senha para excluir:");
+      if (!confirmar) return;
 
-    if (senha !== "1234") {
-      alert("Senha incorreta!");
-      return;
-    }
+      const senha = prompt("Digite a senha:");
 
-    try {
-      showLoading("Excluindo participante...");
+      if (senha !== "1234") {
+        alert("Senha incorreta!");
+        return;
+      }
 
-      await db.collection("participantes").doc(participant.id).delete();
+      try {
+        showLoading("Excluindo participante...");
 
-      hideLoading();
+        await db.collection("participantes").doc(participant.id).delete();
 
-      alert("Participante excluído com sucesso!");
-    } catch (error) {
-      hideLoading();
-      console.error("Erro ao excluir participante:", error);
-      alert("Erro ao excluir participante!");
-    }
-  });
+        hideLoading();
+
+        alert("Participante excluído!");
+      } catch (error) {
+        hideLoading();
+        console.error(error);
+        alert("Erro ao excluir participante!");
+      }
+    }, 1500); // 1,5 segundo segurando
+  }
+
+  function cancelarLongPress() {
+    clearTimeout(pressTimer);
+  }
+
+  // Celular
+  name.addEventListener("touchstart", iniciarLongPress);
+  name.addEventListener("touchend", cancelarLongPress);
+  name.addEventListener("touchmove", cancelarLongPress);
+
+  // Computador
+  name.addEventListener("mousedown", iniciarLongPress);
+  name.addEventListener("mouseup", cancelarLongPress);
+  name.addEventListener("mouseleave", cancelarLongPress);
+
+  name.style.userSelect = "none";
+  name.style.webkitUserSelect = "none";
+  name.style.cursor = "pointer";
 
   const details = document.createElement("div");
   details.className = "participant-details";
