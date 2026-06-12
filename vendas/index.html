@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendas Igreja</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Vendas Igreja</h1>
+      </header>
+
+      <section id="venda-section">
+        <h2>Lançar Venda</h2>
+        <form id="venda-form">
+          <label for="produto-select">Produto:</label>
+          <select id="produto-select" required>
+            <option value="" disabled selected>Carregando produtos...</option>
+          </select>
+
+          <label for="pagamento-select">Pagamento:</label>
+          <select id="pagamento-select" required>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="PIX">PIX</option>
+            <option value="Cartão Débito">Cartão Débito</option>
+            <option value="Cartão Crédito">Cartão Crédito</option>
+          </select>
+
+          <button type="submit" class="btn-primary">Registrar Venda</button>
+        </form>
+      </section>
+
+      <section id="admin-section">
+        <h2>Gerenciar Produtos</h2>
+        <form id="produto-form">
+          <input
+            type="text"
+            id="novo-produto-nome"
+            placeholder="Nome do Produto"
+            required
+          />
+          <input
+            type="number"
+            id="novo-produto-preco"
+            placeholder="Preço (R$)"
+            step="0.01"
+            required
+          />
+          <button type="submit" class="btn-secondary">Adicionar Produto</button>
+        </form>
+        <ul id="lista-produtos"></ul>
+      </section>
+
+      <section id="relatorio-section">
+        <h2>Relatório de Vendas</h2>
+        <div class="filtros">
+          <label for="filtro-produto">Filtrar por Produto:</label>
+          <select id="filtro-produto">
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+        <div id="total-vendas">
+          <p>Total Geral: <strong id="valor-total">R$ 0,00</strong></p>
+        </div>
+
+        <div id="resumo-pagamentos" class="resumo-grid">
+          <!-- Valores por pagamento serão inseridos aqui -->
+        </div>
+        <div class="acoes-relatorio">
+          <button onclick="gerarRelatorioTexto()" class="btn-secondary">
+            Copiar Relatório (Texto)
+          </button>
+        </div>
+        <ul id="lista-vendas"></ul>
+      </section>
+    </div>
+
+    <script>
+      // CONFIGURAÇÃO DO FIREBASE
+      const firebaseConfig = {
+        apiKey: "AIzaSyDN608mpOcPty9_4I0wM8jb_7ea1c6U29E",
+        authDomain: "venda-978eb.firebaseapp.com",
+        projectId: "venda-978eb",
+        storageBucket: "venda-978eb.firebasestorage.app",
+        messagingSenderId: "987020062620",
+        appId: "1:987020062620:web:3be608be1ae6c208f96259",
+      };
+
+      // Inicializar Firebase
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+
+      // Referências
+      const produtoForm = document.getElementById("produto-form");
+      const vendaForm = document.getElementById("venda-form");
+      const produtoSelect = document.getElementById("produto-select");
+      const filtroProduto = document.getElementById("filtro-produto");
+      const listaProdutos = document.getElementById("lista-produtos");
+      const listaVendas = document.getElementById("lista-vendas");
+      const valorTotalElement = document.getElementById("valor-total");
+
+      let produtosData = {};
+      let vendasData = [];
+
+      // --- GERENCIAMENTO DE PRODUTOS ---
+
+      // Salvar novo produto
+      produtoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById("novo-produto-nome").value;
+        const preco = parseFloat(
+          document.getElementById("novo-produto-preco").value,
+        );
+
+        try {
+          await db.collection("produtos").add({
+            nome: nome,
+            preco: preco,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          produtoForm.reset();
+        } catch (error) {
+          console.error("Erro ao adicionar produto: ", error);
+          alert("Erro ao salvar produto. Verifique as regras do Firestore.");
+        }
+      });
+
+      // Ouvir mudanças nos produtos em tempo real
+      db.collection("produtos")
+        .orderBy("nome")
+        .onSnapshot(
+          (snapshot) => {
+            produtosData = {};
+            snapshot.forEach((doc) => {
+              produtosData[doc.id] = doc.data();
+            });
+            renderProdutos();
+            updateSelects();
+          },
+          (error) => {
+            console.error("Erro ao ler produtos: ", error);
+          },
+        );
+
+      function renderProdutos() {
+        listaProdutos.innerHTML = "";
+        Object.keys(produtosData).forEach((id) => {
+          const p = produtosData[id];
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span>${p.nome} - R$ ${p.preco.toFixed(2)}</span>
+            <button class="delete-btn" onclick="deletarProduto('${id}')">X</button>
+        `;
+          listaProdutos.appendChild(li);
+        });
+      }
+
+      function updateSelects() {
+        const selectedValue = produtoSelect.value;
+        produtoSelect.innerHTML =
+          '<option value="" disabled selected>Selecione um produto</option>';
+        filtroProduto.innerHTML = '<option value="todos">Todos</option>';
+
+        Object.keys(produtosData).forEach((id) => {
+          const p = produtosData[id];
+
+          const optVenda = document.createElement("option");
+          optVenda.value = id;
+          optVenda.textContent = `${p.nome} (R$ ${p.preco.toFixed(2)})`;
+          produtoSelect.appendChild(optVenda);
+
+          const optFiltro = document.createElement("option");
+          optFiltro.value = id;
+          optFiltro.textContent = p.nome;
+          filtroProduto.appendChild(optFiltro);
+        });
+
+        if (selectedValue && produtosData[selectedValue]) {
+          produtoSelect.value = selectedValue;
+        }
+      }
+
+      window.deletarProduto = async (id) => {
+        if (confirm("Deseja excluir este produto?")) {
+          try {
+            await db.collection("produtos").doc(id).delete();
+          } catch (error) {
+            alert("Erro ao deletar produto.");
+          }
+        }
+      };
+
+      // --- GERENCIAMENTO DE VENDAS ---
+
+      // Registrar Venda
+      vendaForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const produtoId = produtoSelect.value;
+        const formaPagamento =
+          document.getElementById("pagamento-select").value;
+
+        if (!produtoId) return alert("Selecione um produto!");
+
+        const produto = produtosData[produtoId];
+
+        try {
+          await db.collection("vendas").add({
+            produtoId: produtoId,
+            nomeProduto: produto.nome,
+            valor: produto.preco,
+            pagamento: formaPagamento,
+            data: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          alert("Venda registrada com sucesso!");
+          vendaForm.reset();
+        } catch (error) {
+          console.error("Erro ao registrar venda: ", error);
+          alert("Erro ao registrar venda. Verifique as regras do Firestore.");
+        }
+      });
+
+      // Ouvir mudanças nas vendas em tempo real
+      db.collection("vendas")
+        .orderBy("data", "desc")
+        .onSnapshot(
+          (snapshot) => {
+            vendasData = [];
+            snapshot.forEach((doc) => {
+              vendasData.push({
+                id: doc.id,
+                ...doc.data(),
+              });
+            });
+            renderVendas();
+          },
+          (error) => {
+            console.error("Erro ao ler vendas: ", error);
+          },
+        );
+
+      filtroProduto.addEventListener("change", renderVendas);
+
+      function renderVendas() {
+        const filtro = filtroProduto.value;
+        listaVendas.innerHTML = "";
+        const resumoPagamento = {
+          Dinheiro: 0,
+          PIX: 0,
+          "Cartão Débito": 0,
+          "Cartão Crédito": 0,
+        };
+        let totalGeral = 0;
+
+        const vendasFiltradas =
+          filtro === "todos"
+            ? vendasData
+            : vendasData.filter((v) => v.produtoId === filtro);
+
+        vendasFiltradas.forEach((v) => {
+          totalGeral += v.valor;
+          if (resumoPagamento.hasOwnProperty(v.pagamento)) {
+            resumoPagamento[v.pagamento] += v.valor;
+          }
+
+          const li = document.createElement("li");
+          const dataFormatada = v.data
+            ? new Date(v.data.seconds * 1000).toLocaleString("pt-BR")
+            : "Processando...";
+          li.innerHTML = `
+            <div>
+                <strong>${v.nomeProduto}</strong> - R$ ${v.valor.toFixed(2)}<br>
+                <small>${v.pagamento} | ${dataFormatada}</small>
+            </div>
+            <button class="delete-btn" onclick="deletarVenda('${v.id}')">X</button>
+        `;
+          listaVendas.appendChild(li);
+        });
+
+        // Atualizar Total Geral
+        valorTotalElement.textContent = `R$ ${totalGeral.toFixed(2)}`;
+
+        // Atualizar Grade de Pagamentos
+        const resumoGrid = document.getElementById("resumo-pagamentos");
+        resumoGrid.innerHTML = "";
+        Object.keys(resumoPagamento).forEach((metodo) => {
+          const valor = resumoPagamento[metodo];
+          if (valor > 0 || filtro === "todos") {
+            const card = document.createElement("div");
+            card.className = "card-pagamento";
+            card.innerHTML = `
+                <strong>${metodo}</strong>
+                <span>R$ ${valor.toFixed(2)}</span>
+            `;
+            resumoGrid.appendChild(card);
+          }
+        });
+      }
+
+      window.deletarVenda = async (id) => {
+        if (confirm("Deseja excluir este registro de venda?")) {
+          try {
+            await db.collection("vendas").doc(id).delete();
+          } catch (error) {
+            alert("Erro ao deletar venda.");
+          }
+        }
+      };
+
+      // Função para criar produtos iniciais se necessário
+      async function inicializarProdutos() {
+        const snapshot = await db.collection("produtos").limit(1).get();
+        if (snapshot.empty) {
+          const padrao = [];
+          for (const p of padrao) {
+            await db.collection("produtos").add({
+              ...p,
+              criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        }
+      }
+
+      inicializarProdutos();
+
+      // --- FUNÇÃO DE RELATÓRIO ---
+
+      window.gerarRelatorioTexto = () => {
+        const filtro = filtroProduto.value;
+        const nomeFiltro =
+          filtro === "todos" ? "Todos os Produtos" : produtosData[filtro].nome;
+
+        let total = 0;
+        const vendasFiltradas =
+          filtro === "todos"
+            ? vendasData
+            : vendasData.filter((v) => v.produtoId === filtro);
+
+        if (vendasFiltradas.length === 0) {
+          alert("Não há vendas para gerar relatório.");
+          return;
+        }
+
+        let relatorio = `*RELATÓRIO DE VENDAS - IGREJA*\n`;
+        relatorio += `Filtro: ${nomeFiltro}\n`;
+        relatorio += `Data: ${new Date().toLocaleDateString("pt-BR")}\n`;
+        relatorio += `----------------------------\n\n`;
+
+        // Resumo por forma de pagamento
+        const resumoPagamento = {};
+
+        vendasFiltradas.forEach((v) => {
+          total += v.valor;
+          resumoPagamento[v.pagamento] =
+            (resumoPagamento[v.pagamento] || 0) + v.valor;
+        });
+
+        relatorio += `*RESUMO POR PAGAMENTO:*\n`;
+        Object.keys(resumoPagamento).forEach((pag) => {
+          relatorio += `${pag}: R$ ${resumoPagamento[pag].toFixed(2)}\n`;
+        });
+
+        relatorio += `\n*TOTAL GERAL: R$ ${total.toFixed(2)}*\n`;
+        relatorio += `----------------------------\n`;
+        relatorio += `Gerado via App de Vendas`;
+
+        // Copiar para a área de transferência
+        navigator.clipboard
+          .writeText(relatorio)
+          .then(() => {
+            alert(
+              "Relatório copiado para a área de transferência! Você pode colar no WhatsApp.",
+            );
+          })
+          .catch((err) => {
+            console.error("Erro ao copiar: ", err);
+            alert("Erro ao copiar relatório. Tente novamente.");
+          });
+      };
+    </script>
+  </body>
+</html>

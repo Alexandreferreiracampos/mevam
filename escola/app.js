@@ -386,116 +386,102 @@ async function handleSaveObservation() {
 // GERENCIAMENTO - IMPORTAÇÃO CSV
 // ============================================
 async function handleCsvImport() {
-  const file = csvFile.files[0];
+  const nomes = [
+    "Abdalla Lauh",
+    "Adabel Souza Monteiro",
+    "Afonso Yoshio Marinho",
+    "Agnaldo Soares",
+    "Alan Chrystian Borges da Silva",
+    "Alceu José Vieira Junior",
+    "Alisson Trindade de Castro",
+    "Amarilio ponciano filho",
+    "Breno Nogueira",
+    "Claudio Herberth Ojeda Gonçalves",
+    "Cleison Miranda Bedoni",
+    "Douglas henrique lopes de almeida",
+    "Eduardo Christian Evangelista Souza",
+    "Eduardo marinho Raymundo",
+    "Élvis Wagner Ribeiro",
+    "Francivan araujo dos santos",
+    "Gidario dos Santos",
+    "Gonçalo Pinto da Silva",
+    "Israel Santos Hamon",
+    "Ivan Mendes souza",
+    "Jackson de jesus da silva",
+    "Jean carlos Franco Moreira",
+    "Jean Carlos Silva Do Amaral",
+    "Jeison Lopes de Almeida junior",
+    "João Felipe da Silva",
+    "João Guilherme Guedes Guilhen",
+    "JOÃO PEDRO DA SILVA",
+    "Jonas Gonçalo de Campos",
+    "Kainer Gustavo Gomes dos Santos",
+    "Kelvis Wanderson Sampaio Santos",
+    "Kleverson Oliveira Alves Corrêa",
+    "Leandro Dias de Jesus",
+    "Lucas Emanuel da Rosa",
+    "Maikon Douglas Sancoviche",
+    "Marcel Nunes Monteiro",
+    "Marcos Silva Souza",
+    "Matheus Felipe Lopes Riguetti",
+    "Matheus Paiva",
+    "Milton Pedro Santana",
+    "Patrese Emmert",
+    "PAULO HENRIQUE DE SANT' ANA DANTAS",
+    "Rafael de Freitas Lourenço",
+    "EVAGNO MAGNO",
+    "Samuel Rufino de Oliveira",
+    "Sandro Lucio Moura dos Santos",
+    "Silvio Menezes",
+    "Thiago Henrique Goulart de Souza salzedas crivelente",
+    "Valcir Gonçalves de Abreu",
+    "Victor Hugo Amaral de Almeida",
+    "WELITON DOUGLAS SCHINELLO",
+    "Weslley Cristyan de Morais Tosta",
+    "William Aron Hochmann",
+    "William wesley penha",
+    "Willian de Oliveira e Silva",
+    "Winicius Emanuel Caixeta Tavares da Silva",
+  ];
 
-  if (!file) {
-    alert("Selecione um arquivo CSV!");
-    return;
-  }
+  showLoading("Importando participantes...");
 
-  showLoading("Importando arquivo...");
+  let adicionados = 0;
 
-  const reader = new FileReader();
+  try {
+    for (const nome of nomes) {
+      await db.collection("participantes").add({
+        nome: nome,
+        telefone: "",
+        cidade: "",
+        ministerio: "",
+        pastor: "",
+        cargo: "",
+        dormeEscola: "",
 
-  reader.onload = async (e) => {
-    try {
-      const csv = e.target.result;
+        idUnico: generateId(),
+        origem: "lista_paga",
+        Confirmado: false,
+        pago: true,
+        horaEntrada: null,
+        observacao: "",
+        idEvento: appState.currentEventId,
+        criadoEm: new Date(),
+      });
 
-      // Divide linhas
-      const lines = csv.split("\n");
-
-      let addedCount = 0;
-
-      // Remove cabeçalho
-      lines.shift();
-
-      for (let line of lines) {
-        line = line.trim();
-
-        if (!line) continue;
-
-        // Regex para CSV com aspas
-        const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-
-        if (!cols || cols.length < 2) continue;
-
-        // Limpa aspas
-        const clean = cols.map((c) => c.replace(/^"|"$/g, "").trim());
-
-        // ============================================
-        // COLUNAS DA PLANILHA
-        // ============================================
-
-        const [
-          dataHora,
-          nome,
-          telefone,
-          cidade,
-          ministerio,
-          pastor,
-          cargo,
-          dormeEscola,
-        ] = clean;
-
-        // Ignora sem nome
-        if (!nome) continue;
-
-        // ============================================
-        // SALVA FIRESTORE
-        // ============================================
-
-        await db.collection("participantes").add({
-          nome: nome,
-
-          telefone: telefone || "",
-
-          cidade: cidade || "",
-
-          ministerio: ministerio || "",
-
-          pastor: pastor || "",
-
-          cargo: cargo || "",
-
-          dormeEscola: dormeEscola || "",
-
-          idUnico: generateId(),
-
-          origem: "lista_paga",
-
-          Confirmado: false,
-
-          pago: true,
-
-          horaEntrada: null,
-
-          observacao: "",
-
-          idEvento: appState.currentEventId,
-
-          criadoEm: dataHora ? new Date(dataHora) : new Date(),
-        });
-
-        addedCount++;
-      }
-
-      hideLoading();
-
-      alert(`${addedCount} participante(s) importado(s)!`);
-
-      csvFile.value = "";
-    } catch (error) {
-      hideLoading();
-
-      console.error("Erro ao importar CSV:", error);
-
-      alert("Erro ao importar CSV!");
+      adicionados++;
     }
-  };
 
-  // IMPORTANTE:
-  // Corrige acentos UTF-8
-  reader.readAsText(file, "UTF-8");
+    hideLoading();
+
+    alert(`${adicionados} participante(s) importado(s)!`);
+  } catch (error) {
+    hideLoading();
+
+    console.error("Erro ao importar:", error);
+
+    alert("Erro ao importar participantes.");
+  }
 }
 
 function displayManagementList() {
