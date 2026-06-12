@@ -300,7 +300,7 @@ async function handleAddNewParticipant() {
       nome: name,
       idUnico: generateId(),
       origem: "adicionado_na_hora",
-      Confirmado: true,
+      Confirmado: false,
       horaEntrada: new Date(),
       observacao: observation,
       pago: pago,
